@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "minimotd-fabric",
+  "version": "${version}",
+  "name": "MiniMOTD Fabric",
+  "description": "Set the server list MOTD with MiniMessage on Fabric Servers",
+  "authors": [
+    "jmp"
+  ],
+  "contact": {
+    "website": "https://jpenilla.xyz"
+  },
+  "license": "unlicense",
+  "icon": "assets/MiniMOTD-Fabric/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "xyz.jpenilla.minimotdfabric.MiniMOTDFabric"
+    ]
+  },
+  "mixins": [
+    "MiniMOTD-Fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.9.0+build.204",
+    "fabric": "*",
+    "minecraft": "1.16.1"
+  }
+}

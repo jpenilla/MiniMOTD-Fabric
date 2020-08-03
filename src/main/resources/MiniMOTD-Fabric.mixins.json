@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "xyz.jpenilla.minimotdfabric.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ServerHandshakeNetworkHandlerMixin",
+    "ServerQueryNetworkHandlerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
