@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.4.33'
+    id 'fabric-loom' version '0.4.30'
     id 'maven-publish'
 }
 
@@ -27,6 +27,7 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     implementation "net.kyori:adventure-platform-common:${project.adventure_version}"
     implementation "com.github.jmanpenilla:adventure-text-minimessage:571d2f4408"

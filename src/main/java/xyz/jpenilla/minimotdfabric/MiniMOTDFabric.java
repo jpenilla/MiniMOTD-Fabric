@@ -4,6 +4,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.kyori.adventure.platform.fabric.FabricAudienceProvider;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -23,15 +28,14 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-
 public class MiniMOTDFabric implements ModInitializer {
 
     public static MiniMOTDFabric INSTANCE;
     public static final Logger LOGGER = LogManager.getLogger("MiniMOTD");
+    private final MiniMessage miniMessage = MiniMessage.get();
     private Config config;
     private final List<String> faviconCache = new ArrayList<>();
     private int protocolVersionCache;
-
 
     public int getProtocolVersionCache() {
         return protocolVersionCache;
@@ -59,7 +63,41 @@ public class MiniMOTDFabric implements ModInitializer {
         INSTANCE = this;
         loadConfig();
         loadIcons();
+        registerCommand();
         LOGGER.info("Done initializing MiniMOTD.");
+    }
+
+    private void registerCommand() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> dispatcher.register(
+                CommandManager.literal("minimotd")
+                        .requires(source -> source.hasPermissionLevel(4))
+                        .then(CommandManager.literal("reload")
+                                .executes(ctx -> {
+                                    send(ctx.getSource(), true, "<white>[<gradient:blue:aqua>MiniMOTD</gradient>] <italic><gray>Reloading MiniMOTD...");
+                                    loadConfig();
+                                    loadIcons();
+                                    send(ctx.getSource(), true, "<white>[<gradient:blue:aqua>MiniMOTD</gradient>] <green>Done reloading MiniMOTD.");
+                                    return 1;
+                                })
+                        )
+                        .then(CommandManager.literal("about")
+                                .executes(ctx -> {
+                                    send(ctx.getSource(), false,
+                                            "<strikethrough><gradient:black:white>------------------",
+                                            "<hover:show_text:'<gradient:blue:aqua>click me!'><click:open_url:https://github.com/jmanpenilla/MiniMOTD-Fabric>    MiniMOTD-Fabric",
+                                            "<gray>      By <gradient:gold:yellow>jmp",
+                                            "<strikethrough><gradient:black:white>------------------"
+                                    );
+                                    return 1;
+                                })
+                        )
+        ));
+    }
+
+    private void send(ServerCommandSource c, boolean broadcastToOps, String... strings) {
+        for (String s : strings) {
+            c.sendFeedback(FabricAudienceProvider.adapt(miniMessage.parse(s)), broadcastToOps);
+        }
     }
 
     private void loadConfig() {
@@ -76,6 +114,7 @@ public class MiniMOTDFabric implements ModInitializer {
     }
 
     private void loadIcons() {
+        faviconCache.clear();
         File iconsFolder = new File("server-icons" + File.separator);
         if (!iconsFolder.exists()) {
             iconsFolder.mkdir();
