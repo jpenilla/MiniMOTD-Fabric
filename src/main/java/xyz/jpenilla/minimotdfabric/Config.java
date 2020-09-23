@@ -16,6 +16,16 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @ConfigSerializable
 public class Config {
+
+    @Setting
+    private Motd motd = Motd.getDefaultMotd();
+
+    @Setting
+    private MaxPlayers maxPlayers = new MaxPlayers();
+
+    @Setting
+    private FakePlayers fakePlayers = new FakePlayers();
+
     private static ObjectMapper<Config> MAPPER;
 
     static {
@@ -26,15 +36,12 @@ public class Config {
         }
     }
 
-    @Setting
-    private Motd motd = Motd.getDefaultMotd();
-    @Setting
-    private MaxPlayers maxPlayers = new MaxPlayers();
-    @Setting
-    private FakePlayers fakePlayers = new FakePlayers();
-
     public static Config loadFrom(CommentedConfigurationNode node) throws ObjectMappingException {
         return MAPPER.bindToNew().populate(node);
+    }
+
+    public void saveTo(CommentedConfigurationNode node) throws ObjectMappingException {
+        MAPPER.bind(this).serialize(node);
     }
 
     public MaxPlayers getMaxPlayers() {
@@ -53,10 +60,6 @@ public class Config {
         this.fakePlayers = fakePlayers;
     }
 
-    public void saveTo(CommentedConfigurationNode node) throws ObjectMappingException {
-        MAPPER.bind(this).serialize(node);
-    }
-
     public Motd getMotd() {
         return motd;
     }
@@ -67,24 +70,19 @@ public class Config {
 
     @ConfigSerializable
     public static class Motd {
-        private final GsonComponentSerializer gsonComponentSerializer = GsonComponentSerializer.gson();
-        private final GsonComponentSerializer legacyGsonComponentSerializer = GsonComponentSerializer.colorDownsamplingGson();
+
         @Setting(value = "motds", comment = "The list of MotDs to use\n" +
                 "  Placeholders: {onlinePlayers} {maxPlayers}\n" +
                 "  Use {br} to separate lines.\n" +
                 "  Putting more than one will cause one to be randomly chosen each refresh")
         private final List<String> motds = new ArrayList<>();
+
         @Setting(value = "motd-enabled", comment = "Enable/Disable changing the MotD")
         private boolean enabled = true;
 
-        public static Motd getDefaultMotd() {
-            final Motd motd = new Motd();
-            motd.getMotds().add("<white><rainbow>|||||||||||||||||||||||||||||||||||||</rainbow>     A Fabric Server     <rainbow>|||||||||||||||||||||||||||||||||||||</rainbow>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
-            motd.getMotds().add("<white><gradient:blue:green>|||||||||||||||||||||||||||||||||||||</gradient>     A Fabric Server     <gradient:green:blue>|||||||||||||||||||||||||||||||||||||</gradient>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
-            motd.getMotds().add("<white><gradient:red:blue:red>|||||||||||||||||||||||||||||||||||||</gradient>     A Fabric Server     <gradient:blue:red:blue>|||||||||||||||||||||||||||||||||||||</gradient>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
-            motd.getMotds().add("<white><gradient:green:yellow>|||||||||||||||||||||||||||||||||||||</gradient>     A Fabric Server     <gradient:yellow:green>|||||||||||||||||||||||||||||||||||||</gradient>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
-            return motd;
-        }
+        private static final GsonComponentSerializer gsonComponentSerializer = GsonComponentSerializer.gson();
+        private static final GsonComponentSerializer legacyGsonComponentSerializer = GsonComponentSerializer.colorDownsamplingGson();
+        private static final MiniMessage miniMessage = MiniMessage.get();
 
         public List<String> getMotds() {
             return motds;
@@ -99,26 +97,40 @@ public class Config {
         }
 
         public Text getMotd(int max, int online, int clientProtocolVersion) {
-            Component component = MiniMessage.get().parse(motds.get(ThreadLocalRandom.current().nextInt(motds.size()))
+            Component component = miniMessage.parse(motds.get(ThreadLocalRandom.current().nextInt(motds.size()))
                     .replace("{onlinePlayers}", String.valueOf(online))
                     .replace("{maxPlayers}", String.valueOf(max))
                     .replace("{br}", "\n"));
+
             if (clientProtocolVersion > 700) {
                 return Text.Serializer.fromJson(gsonComponentSerializer.serialize(component));
             } else {
                 return Text.Serializer.fromJson(legacyGsonComponentSerializer.serialize(component));
             }
         }
+
+        public static Motd getDefaultMotd() {
+            final Motd motd = new Motd();
+            motd.getMotds().add("<white><rainbow>|||||||||||||||||||||||||||||||||||||</rainbow>     A Fabric Server     <rainbow>|||||||||||||||||||||||||||||||||||||</rainbow>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
+            motd.getMotds().add("<white><gradient:blue:green>|||||||||||||||||||||||||||||||||||||</gradient>     A Fabric Server     <gradient:green:blue>|||||||||||||||||||||||||||||||||||||</gradient>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
+            motd.getMotds().add("<white><gradient:red:blue:red>|||||||||||||||||||||||||||||||||||||</gradient>     A Fabric Server     <gradient:blue:red:blue>|||||||||||||||||||||||||||||||||||||</gradient>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
+            motd.getMotds().add("<white><gradient:green:yellow>|||||||||||||||||||||||||||||||||||||</gradient>     A Fabric Server     <gradient:yellow:green>|||||||||||||||||||||||||||||||||||||</gradient>{br}                   {onlinePlayers} <blue>/</blue> {maxPlayers} Players Online");
+            return motd;
+        }
     }
 
     @ConfigSerializable
     public static class MaxPlayers {
+
         @Setting(value = "max-players-enabled", comment = "Enable/Disable changing the Max Players number displayed")
         private boolean enabled = true;
+
         @Setting(value = "max-players", comment = "Set the Max Players")
         private int maxPlayers = 69;
+
         @Setting(value = "just-x-more-enabled", comment = "Changes the Max Players to X more than the online players\nExample: 16/19 players online.")
         private boolean xMoreEnabled = false;
+
         @Setting(value = "x-value", comment = "Set the x value for the just-x-more-enabled setting")
         private int xValue = 3;
 
@@ -165,8 +177,10 @@ public class Config {
 
     @ConfigSerializable
     public static class FakePlayers {
+
         @Setting(value = "fake-players-enabled", comment = "Should fake players be added to the online players total")
         private boolean enabled = false;
+
         @Setting(value = "fake-players",
                 comment = "Modes: static, random, percent\n" +
                         "    static: This many fake players will be added\n" +
@@ -209,7 +223,7 @@ public class Config {
                     i = onlinePlayers + addedPlayers;
                 }
             } catch (NumberFormatException ex) {
-                System.out.println("[MiniMOTD] fakePlayers config incorrect");
+                MiniMOTDFabric.LOGGER.info("Invalid fakePlayers config in minimotd.conf", ex);
                 i = 0;
             }
             return i;
