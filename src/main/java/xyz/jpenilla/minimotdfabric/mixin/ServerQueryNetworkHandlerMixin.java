@@ -37,6 +37,10 @@ public class ServerQueryNetworkHandlerMixin {
             final ServerMetadata.Players newPlayers = new ServerMetadata.Players(maxPlayers, onlinePlayers);
             newPlayers.setSample(oldSample);
             server.getServerMetadata().setPlayers(newPlayers);
+
+            if (MiniMOTDFabric.INSTANCE.hasFavicon()) {
+                server.getServerMetadata().setFavicon(MiniMOTDFabric.INSTANCE.getRandomFavicon());
+            }
         }
     }
 }
