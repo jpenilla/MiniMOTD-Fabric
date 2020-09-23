@@ -7,7 +7,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version + "-" + project.minecraft_version
+version = "$project.mod_version-$project.minecraft_version"
 group = project.maven_group
 
 repositories {
@@ -28,24 +28,22 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.kyori:adventure-platform-common:${project.adventure_version}"
+    implementation "com.github.jmanpenilla:adventure-text-minimessage:571d2f4408"
+    include "com.github.jmanpenilla:adventure-text-minimessage:571d2f4408"
+    implementation "net.kyori:adventure-text-serializer-gson:${project.adventure_version}"
+    include "net.kyori:adventure-text-serializer-gson:${project.adventure_version}"
+    implementation "org.spongepowered:configurate-hocon:${project.configurate_version}"
+    include "org.spongepowered:configurate-hocon:${project.configurate_version}"
+    implementation "org.spongepowered:configurate-core:${project.configurate_version}"
+    include "org.spongepowered:configurate-core:${project.configurate_version}"
+    implementation "com.typesafe:config:${project.typesafe_version}"
+    include "com.typesafe:config:${project.typesafe_version}"
 
-    implementation 'net.kyori:adventure-platform-common:4.0.0-SNAPSHOT'
-    implementation 'net.kyori:adventure-text-minimessage:3.0.0-SNAPSHOT'
-    include 'net.kyori:adventure-text-minimessage:3.0.0-SNAPSHOT'
-    implementation 'net.kyori:adventure-text-serializer-gson:4.0.0-SNAPSHOT'
-    include 'net.kyori:adventure-text-serializer-gson:4.0.0-SNAPSHOT'
-    implementation 'org.spongepowered:configurate-hocon:3.7'
-    include 'org.spongepowered:configurate-hocon:3.7'
-    implementation 'org.spongepowered:configurate-core:3.7'
-    include 'org.spongepowered:configurate-core:3.7'
-    implementation 'com.typesafe:config:1.4.0'
-    include 'com.typesafe:config:1.4.0'
-
-    modImplementation("net.kyori:adventure-platform-fabric:2.0-SNAPSHOT+4.0.0") {
+    modImplementation("net.kyori:adventure-platform-fabric:${project.adventure_version}") {
         exclude(group: "com.google.code.gson", module: "gson")
     }
-    include("net.kyori:adventure-platform-fabric:2.0-SNAPSHOT+4.0.0")
+    include("net.kyori:adventure-platform-fabric:${project.adventure_version}")
 }
 
 processResources {
