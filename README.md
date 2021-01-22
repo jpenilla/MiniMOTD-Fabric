@@ -1,4 +1,7 @@
 # MiniMOTD-Fabric
+
+> This repo is archived as it has been replaced by the fabric module of MiniMOTD 
+
 MiniMOTD-Fabric is a server-side only Fabric mod for Minecraft that allows easily changing the server list motd with support for RGB, gradients, and more.
 
 ![image](https://i.imgur.com/1YU9iqG.png)
